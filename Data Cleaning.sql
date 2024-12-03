@@ -58,6 +58,7 @@ WHERE row_num>1;
 
 
 --2 Standardazing the data (column by column)
+
 SELECT company, (TRIM(company))
 FROM layoffs_staging2;
 
@@ -113,6 +114,7 @@ MODIFY COLUMN `date` DATE;
 
 
 --3 Tackling Null/blank values
+
 SELECT *
 FROM layoffs_staging2
 WHERE total_laid_off IS NULL
@@ -167,6 +169,8 @@ WHERE total_laid_off IS NULL AND percentage_laid_off IS NULL;
 SELECT *
 FROM layoffs_staging2;
 
+
 --4 Remove unnecessary columns/rows (delete row_num column)
+
 ALTER TABLE layoffs_staging2
 DROP COLUMN row_num;
