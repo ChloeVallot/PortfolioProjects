@@ -1,9 +1,4 @@
-/*
-Data cleaning in SQL queries
-/*
-
-
-#0 Creating a staging duplicate table
+--0 Creating a staging duplicate table
 
 CREATE TABLE layoffs_staging
 LIKE layoffs;
@@ -11,13 +6,12 @@ LIKE layoffs;
 SELECT *
 FROM layoffs_staging;
 
-#0 Creating staging table
 INSERT layoffs_staging
 SELECT *
 FROM layoffs;
 
 
-#1 Removing duplicates
+--1 Removing duplicates
 
 SELECT *, 
 ROW_NUMBER() OVER(
@@ -33,7 +27,7 @@ SELECT *
 FROM duplicate_cte
 WHERE row_num>1;
 
-# Creating another staging table to remove duplicates (we are lacking a column with unique values)
+-- Creating another staging table to remove duplicates (we are lacking a column with unique values)
 CREATE TABLE `layoffs_staging2` (
   `company` text,
   `location` text,
@@ -60,10 +54,10 @@ WHERE row_num>1;
 DELETE 
 FROM layoffs_staging2
 WHERE row_num>1;
-# We will remove row_num column at the end
+-- We will remove row_num column at the end
 
 
-#2 Standardazing the data (column by column)
+--2 Standardazing the data (column by column)
 SELECT company, (TRIM(company))
 FROM layoffs_staging2;
 
@@ -73,7 +67,7 @@ SET company=TRIM(company);
 SELECT DISTINCT industry
 FROM layoffs_staging2
 ORDER BY industry;
-#Cryto had several denominations, such as "Crypto" or "Cryptocurrency" -> needs a fix
+-- Cryto had several denominations, such as "Crypto" or "Cryptocurrency" -> needs a fix
 
 SELECT *
 FROM layoffs_staging2
@@ -82,17 +76,17 @@ WHERE industry LIKE 'Crypto%';
 UPDATE layoffs_staging2
 SET industry='Crypto'
 WHERE industry LIKE 'Crypto%';
-#Will tacle the issue of a blank industry later
+-- Will tacle the issue of a blank industry later
 
 SELECT DISTINCT location
 FROM layoffs_staging2
 ORDER BY 1;
-#No issues found
+-- No issues found
 
 SELECT DISTINCT country
 FROM layoffs_staging2
 ORDER BY 1;
-#Two entries for USA : "United States" and "United States." -> needs a fix
+-- Two entries for USA : "United States" and "United States." -> needs a fix
 
 SELECT *
 FROM layoffs_staging2
@@ -107,7 +101,7 @@ UPDATE layoffs_staging2
 SET country=TRIM(TRAILING '.' FROM country)
 WHERE country LIKE 'United States%';
 
-#Changing the 'date' column's data type (right now it is text)
+-- Changing the 'date' column's data type (right now it is text)
 SELECT `date`
 FROM layoffs_staging2;
 
@@ -118,7 +112,7 @@ ALTER TABLE layoffs_staging2
 MODIFY COLUMN `date` DATE;
 
 
-#3 Tackling Null/blank values
+--3 Tackling Null/blank values
 SELECT *
 FROM layoffs_staging2
 WHERE total_laid_off IS NULL
@@ -140,7 +134,7 @@ JOIN layoffs_staging2 t2
     AND t1.location=t2.location
 WHERE t1.industry IS NULL OR t1.industry=''
 AND t2.industry IS NOT NULL;
-#See companies that have blanck industries (t1) and next to them if these companies also have rows where the industry is specified (t2)
+-- See companies that have blanck industries (t1) and next to them if these companies also have rows where the industry is specified (t2)
 
 UPDATE layoffs_staging2 t1
 JOIN layoffs_staging2 t2
@@ -173,6 +167,6 @@ WHERE total_laid_off IS NULL AND percentage_laid_off IS NULL;
 SELECT *
 FROM layoffs_staging2;
 
-#4 Remove unnecessary columns/rows (delete row_num column)
+--4 Remove unnecessary columns/rows (delete row_num column)
 ALTER TABLE layoffs_staging2
 DROP COLUMN row_num;
